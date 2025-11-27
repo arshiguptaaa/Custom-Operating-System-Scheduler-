@@ -1,111 +1,96 @@
-# Custom-Operating-System-Scheduler-
-A Linux-based CPU scheduling engine implementing offline and online schedulers using real process execution via POSIX system calls.
-The project leverages fork(), execvp(), and signal-driven preemption (SIGSTOP, SIGCONT) to simulate kernel-like scheduling behavior entirely in user space.
+# Custom OS-Level CPU Scheduler
 
-🚀 Features
-Offline Schedulers 
+A Linux-based CPU scheduling engine implementing both **offline** and **online** schedulers using real process execution via POSIX system calls.  
+This scheduler uses `fork()`, `execvp()`, and signal-based preemption (`SIGSTOP`, `SIGCONT`) to emulate OS-level context switching entirely in user space.
 
-MTL458_Assignment_2
+---
 
-FCFS – Non-preemptive, sequential execution
+##  Features
 
-Round Robin (RR) – Fixed quantum-based time slicing
+### **Offline Scheduling Algorithms**
+- **First-Come First-Serve (FCFS)**  
+  Non-preemptive, sequential execution of tasks.
+- **Round Robin (RR)**  
+  Quantum-based preemptive scheduling using circular queues.
+- **Multi-Level Feedback Queue (MLFQ)**  
+  Three-level queue structure with dynamic demotion and periodic priority boosting.
 
-MLFQ (3-level) – Priority-driven queues with dynamic demotion and periodic boosting
+### **Online Scheduling Algorithms**
+- **Adaptive MLFQ**
+  - New tasks start at Medium priority.
+  - Priority recalculated using historical average burst time.
+  - Queue selected based on burst estimate vs. queue quantum.
+- **Predictive Shortest Job First (SJF)**
+  - Default burst = 1s for first run.
+  - Subsequent burst predictions = average of last *k* valid bursts.
+  - Error-ending bursts excluded from history.
 
-Online Schedulers 
+---
 
-MTL458_Assignment_2
+##  System Architecture Overview
 
-Adaptive MLFQ
+### **Process Management**
+- `fork()` used to spawn new child processes.
+- `execvp()` executes the actual command.
+- `SIGSTOP` / `SIGCONT` simulate preemption and resumption.
 
-New tasks begin at medium priority
+### **Context Switching Engine**
+- Uses timestamps to measure accurate process burst times.
+- Non-blocking STDIN polling to accept real-time tasks.
+- Scheduler loop handles preemption, queue updates, and logging.
 
-Priority updated using historical average burst times
+### **Queue & Scheduling Structures**
+- Circular queue for **Round Robin**.
+- Three-level **MLFQ** with configurable time slices.
+- Automatic **priority boosting** after a fixed interval.
 
-Queue placement based on burst time vs. per-queue quantum
+### **Performance Metrics**
+Tracked for every process:
+- Completion Time  
+- Turnaround Time  
+- Waiting Time  
+- Response Time  
 
-Predictive SJF
+All metrics are exported to CSV files (e.g., `result_offline_RR.csv`).
 
-Default burst = 1s for first execution
+---
 
-Subsequent predictions = mean of last k valid bursts
+## Output Format
 
-Error-ending executions excluded from history
-
-🛠 System Architecture
-
-Process Control
-
-fork() to spawn tasks
-
-execvp() to run commands
-
-Preemption and resume via SIGSTOP/SIGCONT
-
-Context Switching Engine
-
-Timestamp-based burst measurement
-
-Non-blocking I/O to capture live process arrivals
-
-Queue Structures
-
-Circular queues for RR
-
-Three-level MLFQ with configurable time slices and boost period
-
-Metrics Tracking
-
-Completion, turnaround, waiting, and response times
-
-CSV export per scheduler type (e.g., result_offline_RR.csv)
-
-📈 Output Specification 
-
-MTL458_Assignment_2
-
-After each context switch:
-
+### **After every context switch:**
 <Command>, <StartTime>, <EndTime>
 
+### **For each completed process (CSV rows):**
+- Command  
+- Finished (Yes/No)  
+- Error (Yes/No)  
+- Completion Time (ms)  
+- Turnaround Time (ms)  
+- Waiting Time (ms)  
+- Response Time (ms)
 
-For each finished task (logged in CSV):
+---
 
-Command
+## Project Structure
+offline_schedulers.h # FCFS, RR, MLFQ (offline)
+online_schedulers.h # Adaptive MLFQ & Online SJF
+utils/ # Timing, logging, data structures
+data/ # Auto-generated CSV outputs
+main.c # Scheduler entrypoint
 
-Finished (Yes/No)
+---
 
-Error (Yes/No)
+##  Running the Scheduler
 
-Completion Time (ms)
-
-Turnaround Time (ms)
-
-Waiting Time (ms)
-
-Response Time (ms)
-
-📦 Project Structure
-offline_schedulers.h      # FCFS, RR, MLFQ (offline)
-online_schedulers.h       # Adaptive MLFQ & Online SJF
-utils/                    # Timing, logging, queues
-data/                     # Generated CSV logs
-main.c                    # Scheduler entrypoint
-
-▶️ How to Run
-Compile
+### **Compile in bash**
 gcc main.c -o scheduler
 
-Run Offline
+Run Offline Scheduler
 ./scheduler --mode offline --policy MLFQ input.txt
 
-Run Online
+Run Online Scheduler
 ./scheduler --mode online --policy SJF
 
 
-Enter commands dynamically (non-blocking):
 
-ls -l
-sleep 1
-echo Hello
+
