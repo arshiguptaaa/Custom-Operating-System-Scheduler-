@@ -72,11 +72,15 @@ All metrics are exported to CSV files (e.g., `result_offline_RR.csv`).
 ---
 
 ## Project Structure
-offline_schedulers.h # FCFS, RR, MLFQ (offline)
-online_schedulers.h # Adaptive MLFQ & Online SJF
-utils/ # Timing, logging, data structures
-data/ # Auto-generated CSV outputs
-main.c # Scheduler entrypoint
+## 📦 Project Structure
+
+```text
+offline_schedulers.h      # FCFS, RR, MLFQ (offline)
+online_schedulers.h       # Adaptive MLFQ & Online SJF
+utils/                    # Timing, logging, data structures
+data/                     # Auto-generated CSV outputs
+main.c                    # Scheduler entrypoint
+
 
 ---
 
